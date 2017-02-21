@@ -1,0 +1,19 @@
+Assignment 2 of COMP3331 UNSW (Networks): Overall mark 10/10
+
+Working with sockets (all nodes send and receive) and graph theory. 
+
+Threads isn't actually necessary in Python sockets as Python 
+automatically stores things in buffers when no one is listening.
+
+EXAMPLE:
+
+Node 1 sends "Hello" ---> Node 2 (currently busy)
+
+After node 2 becomes unbusy
+
+Node 2 reads from socket ---> "Hello" (buffered by Python)
+
+Graph theory: Dijsktra's algorithm and printing out path route
+(somewhat tricky).
+
+Sockets: Sending receiving packets, formatting packets, translating to information (regex), underlying network theory.

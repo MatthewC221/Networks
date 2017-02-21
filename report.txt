@@ -1,0 +1,64 @@
+//MATTHEW CHEn z5062107
+
+REPORT ASSIGNMENT 2
+Apologies for the .txt format
+
+Python2 was used for this assignment.
+
+Functions: 
+
+def initialise(): initialise the root node along with it's neighbours (allows the program to begin sending packets)
+def print_graph(g): prints the global graph
+def create_packet(): creates the link state packet
+def send_packets(number, graph): send packets to neighbours, then wait for packets to come back and rebroadcast (method discussed further later)
+def create_graph(graph): creates the full graph after a wave of packets has been received
+def dijkstra(graph, time): dijkstra's algorithm for each node, prints as well
+def is_adjacent(graph, node1, node2): returns if the node is adjacent to the other node
+def check_all(): checks if any nodes haven't been discovered yet using dijkstra 
+def find_minimum(graph, node): finds minimum edge weight for current node
+def reset_visited(graph, last_node): resets the visited dictionary except for the node it came from
+def rebroadcast(message): rebroadcasts the message to every neighbouring node except for the one it received the message from
+def recreate(message): recreates the message to rebroadcast, this involves changing the age, changing the sender router (all others are constant)
+class Vertex + class Graph: for all graph/vertex operations
+main: run the program eternally, every 30 seconds run dijkstra, every second resend packets
+
+Data structure and link-state packet format
+The data structure I used were two classes of Graph and Vertex, the graph was undirected and the edges had weight. My link state packet looked like so:
+
+    #--------
+    #Version: 1.1
+    #Root router: A
+    #Sender router: node_ID
+    #Sequence number: 231
+    #Age: 0 <-- append this
+    #Root neighbours: A5, D2, E3, F1 (numbers represent weight)
+    #Link IP: 127.0.0.1
+    #Length of packet: 25
+    #--------
+    
+The root router is the router which created the message
+Sender is the router it came from
+Age is age of packet (starts at 0)
+Root neighbours specifies the neighbours of the root node, the number representing the weight
+
+Deals with node failures and restrict link state packets
+
+Link state packets counter:
+	- Rebroadcast every packet from the original router once only, regardless of how many times it's been received 
+
+Node failures:
+	- Recreate the graph every time, not having to deal with deleting nodes, (if a node dies, everyone else will notice because they don't receive 
+	packets from that node), thus no edges are created (in class, if vertexes dont exist dont create edges), and the graph will basically be different.
+
+Design tradeoffs:
+	- I made many hashes and arrays, not the besy way to go. I also didn't use multithreading, so very big delays are an issue
+	- Dijkstra is not made too well, really messy because I tried to create it myself. However I think it runs the most efficient amount of times.
+	- Python socket recv buffers, so there isn't a need for threads
+
+Improvements:
+	- Have a separate heartbeat message? Otherwise I would make the graph detect three missing segments before dying, (in my program, by the end of the pe		riod if I haven't received a packet from a node it won't be created) 
+
+
+Also my program can struggle when there is big delays (>4.5 seconds), this is because I didn't use threads so some nodes get caught up on receiving (I tried to counteract this by setting maximum amount of time to receive to 4.5, but if a node doesn't send by that time it breaks). Basically when the nodes startup at different times they send bulk messages at the ones that haven't started up yet, so the whole time the late ones are catching up instead of running the timer. To fix this I would implement threads. This will just break the program on large delays, although if that was to be examined I would've attempted a fix.
+
+
