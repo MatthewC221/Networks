@@ -1,6 +1,6 @@
 #!/usr/bin/python2
 
-#z5062107 MATTHEW Y F CHEN
+# z5062107 MATTHEW Y F CHEN
 
 from socket import *
 from time import sleep
@@ -33,10 +33,7 @@ node_port = 0;
 * I regret this implementation heavily, it is too complex and vague looking back, the hashes have almost identical names as well...
 * In my defence the second part of the assignment (which caused me to make many more hashes) was due very soon and I had other things pending, however 
 * admittedly some hashes are not that necessary.
-
 """
-
-
 full_graph = {}
 weight = {}   
 all_messages = {}
@@ -53,19 +50,15 @@ temp_array = []
 listening_ports = []
 
 IP = 0;
-route_update_interval = 30;	        #dijkstra every 30
-update_interval = 1;	            #send link state packets every second
+route_update_interval = 30;	        # Dijkstra every 30
+update_interval = 1;	            # Send link state packets every second
 sender_router = "Z"
-
 
 next_nodes = []
 temp_nodes = []
 
-
 def initialise():   #   Create initial conditions (what my node is in reach of, etc.) and read file
-
     temp_file = open(sys.argv[3])
-    
     num_lines = int(temp_file.readline())   
     i = 0
     
@@ -81,12 +74,8 @@ def initialise():   #   Create initial conditions (what my node is in reach of, 
         weight[temp_array[0]] = rounded_decimal
          
     temp_file.close()
-    
-
-    return;
 
 def print_graph(g): #print the graph (node1, node2, weight)
-
     for v in g:
         for w in v.get_connections():
             vid = v.get_id()
@@ -95,61 +84,49 @@ def print_graph(g): #print the graph (node1, node2, weight)
 
     for v in g:
         print 'g.vert_dict[%s]=%s' %(v.get_id(), g.vert_dict[v.get_id()])
-        
-    return;
 
 def create_packet():        #   Packet creation
-
-    #the link state packet should contain the router's neighbours
-    #packet starts with identity of sender, followed by sequence number and age
-    #layout:
+    # The link state packet should contain the router's neighbours
+    # Packet starts with identity of sender, followed by sequence number and age
+    # Layout:
     
     #--------
-    #Version: 1.1
-    #Root router: A
-    #Sender router: node_ID
-    #Sequence number: 231
-    #Age: 0 <-- append this
-    #Root neighbours: A5, D2, E3, F1 (numbers represent weight)
-    #Link IP: 127.0.0.1
-    #Length of packet: 25
+    # Version: 1.1
+    # Root router: A
+    # Sender router: node_ID
+    # Sequence number: 231
+    # Age: 0 <-- append this
+    # Root neighbours: A5, D2, E3, F1 (numbers represent weight)
+    # Link IP: 127.0.0.1
+    # Length of packet: 25
     #--------
         
     random.seed(time.time()) 
     seq_number = random.randrange(0, 150);
     temp_neighbours = "Link neighbours: "
-    
     for v in weight:
         temp_neighbours = temp_neighbours + v + repr(weight[v]) + " "
     
     temp_neighbours = temp_neighbours + "\n"  
-    
     packet = ("--------\nVersion: 1.1\nRoot router: " + node_ID + "\nSender router: " + node_ID + "\nSequence number: " + repr(seq_number) + "\n" + "Age: 0\n" + temp_neighbours + "Link IP: 127.0.0.1\nPacket length = ")
-    
     temp_length = len(packet)
     
     packet = packet + repr(temp_length) + "\n--------\n"
-    #print packet
-    
-
     return packet;
     
 def send_packets(number, graph):
-
-    #send initial packet
+    # Send initial packet
     i = 0
     all_nodes = len(neighbours)
     message_sent = create_packet()
     all_messages[node_ID] = 1 
     serverSocket.settimeout(5)
     
-    #initial broadcast, then wait for packets to rebroadcast
-
+    # Initial broadcast, then wait for packets to rebroadcast
     for i in range(0, all_nodes):
         serverSocket.sendto(message_sent, ('127.0.0.1', int(listening_ports[i])))  
 
-    temp_start = time.time()
-    
+    temp_start = time.time()    
     while time.time() - temp_start < 7.5:
         try:
            message_received = serverSocket.recv(1024)
@@ -160,20 +137,14 @@ def send_packets(number, graph):
 
     print "------"
 
-    return;
-
 def create_graph(graph):
-
     global complete_list;
-
     graph.add_vertex(node_ID)
- 
-    for v in nodes:        ###U FOOL, all the nodes didnt exist yet
+    for v in nodes:        
         if (complete_list.has_key(v) == 0):
-            graph.add_vertex(v)     #this is what happened, made A, gave BCD edges, BCD not alive
+            graph.add_vertex(v)    
             complete_list[v] = 1; 
             
-
     for v in full_graph:
         temp_string = full_graph[v].split( ) 
         for temp in range(0, len(temp_string)):
@@ -182,25 +153,20 @@ def create_graph(graph):
     print "Nodes alive: "
     print g.get_vertices()
     dijkstra(g)        
-    
-    return;
 
 def dijkstra(graph):
-
     global visited, temp_nodes;
-    
     distances[node_ID] = 0
     visited[node_ID] = 1
     
-    for temp in graph.get_vertices():       #initialise all the distances
+    for temp in graph.get_vertices():       # Initialise all the distances
         path[temp] = node_ID
         if temp != node_ID:
             distances[temp] = 99999;
             visited[temp] = 0
             all_nodes[temp] = 0
     
-#strategy, have array for each node, if each node has had dijkstra called on it, then we end
-    
+    #Strategy, have array for each node, if each node has had dijkstra called on it, then we end
     temp_nodes.append(node_ID)
     all_nodes[node_ID] = 1
     
@@ -239,40 +205,28 @@ def dijkstra(graph):
     del temp_nodes[:]
     del next_nodes[:]
     sleep(1)
-    
-    return;
 
 def is_adjacent(graph, node1, node2):   #returns 1 if adjacent, 0 otherwise
-
     temp_node = graph.get_vertex(node1)
     for temp in temp_node.get_connections():
         if temp.id == node2:
-            return 1;
-    
-    return 0;
-    
-
+            return 1
+    return 0
 
 def check_all():
-    
     return_value = 1
     for temp in all_nodes:
         if (all_nodes[temp] == 0):
             return_value = 0
             break;
-    
     return return_value
 
 def reset_visited(graph, last_node):
-    
-    for temp in graph.get_vertices():       #initialise all the distances
+    for temp in graph.get_vertices():       # Initialise all the distances
         if temp != node_ID and temp != last_node:
             visited[temp] = 0
 
-    return;
-
-def find_minimum(graph, node): #find node to go to
-
+def find_minimum(graph, node): # Find node to go to
     minimum = 99999;
     minimum_node = 'Z';
     new_node = graph.get_vertex(node)
@@ -281,21 +235,16 @@ def find_minimum(graph, node): #find node to go to
             if (new_node.get_weight(temp) < minimum):
                 minimum = new_node.get_weight(temp)
                 minimum_node = temp.id            
-
-
     return minimum_node;
     
-def check_duplicates(graph, node1, node2):      #check duplicates within graph because graph implementation doesn't have it
-
+def check_duplicates(graph, node1, node2):      # Check duplicates within graph because graph implementation doesn't have it
     duplicate = 0
-
     check_duplicate = graph.get_vertex(node1)
     if (check_duplicate != None):
         for check_counter in check_duplicate.get_connections():
             if check_counter.id == node1:
                 duplicate = 1
                 break;   
-            
     return duplicate;
 
 def rebroadcast(message):
@@ -314,11 +263,8 @@ def rebroadcast(message):
     return;
 
 def recreate(message):
-
-    global sender_router;
-
-    #some searches to reconstruct my new message
-
+    global sender_router
+    # Some searches to reconstruct my new message
     searchObj = re.search( r'Root router: (.*)', message, re.M|re.I)
     if searchObj:
         nodes[searchObj.group(1)] = 1
@@ -342,12 +288,9 @@ def recreate(message):
         neighbours_hash[searchObj5.group(1)] = 1;   
     
     packet = ("--------\nVersion: 1.1\nRoot router: " + sender_router + "\nSender router: " + node_ID + "\nSequence number: " + sequence_constant + "\n" + "Age: "+ repr(age_replace) + "\nLink neighbours: " + neighbours_constant + "\nLink IP: 127.0.0.1\nPacket length = ")  
-    
     full_graph[sender_router] = neighbours_constant
     temp_length = len(packet)
-    
     packet = packet + repr(temp_length) + "\n--------\n"    
-        
     return packet
 
 class Vertex:
@@ -359,10 +302,8 @@ class Vertex:
         return str(self.id) + ' adjacent: ' + str([x.id for x in self.adjacent])
 
     def add_neighbor(self, neighbor, weight=0):
-        
         self.adjacent[neighbor] = weight
 
-    
     def get_connections(self):
         return self.adjacent.keys()  
 
@@ -403,10 +344,9 @@ class Graph:
     def get_vertices(self):
         return self.vert_dict.keys()
 
-
 if __name__ == "__main__":
 
-    #two arguments, NODE ID and NODE_PORT
+    # Two arguments, NODE ID and NODE_PORT
     
     if (len(sys.argv) != 4):
         sys.stderr.write("<ass2.py> ./new.py NODE_ID NODE_PORT TEXT_FILE\n")
@@ -422,15 +362,10 @@ if __name__ == "__main__":
         serverSocket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         serverSocket.bind((IP, node_port))   
         
-        ###for timing###
         initialise()
-        
-        #starting time of program
         time_start = time.time()
         timer_counter = 0
-        
         route_update_interval = 30
-        
         while 1:
             if (time.time() - time_start >= update_interval):
                 initialise()
