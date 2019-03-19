@@ -50,8 +50,8 @@ temp_array = []
 listening_ports = []
 
 IP = 0;
-route_update_interval = 30;	        # Dijkstra every 30
-update_interval = 1;	            # Send link state packets every second
+route_update_interval = 30;	       
+update_interval = 1;	           
 sender_router = "Z"
 
 next_nodes = []
@@ -75,7 +75,7 @@ def initialise():   #   Create initial conditions (what my node is in reach of, 
          
     temp_file.close()
 
-def print_graph(g): #print the graph (node1, node2, weight)
+def print_graph(g):
     for v in g:
         for w in v.get_connections():
             vid = v.get_id()
